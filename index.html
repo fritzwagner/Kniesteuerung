@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Steuerung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .input-container {
+            margin: 20px 0;
+        }
+        .range-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        input[type="range"] {
+            width: 60%;
+            margin: 10px;
+        }
+        .angle-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Arduino Steuerung</h1>
+        
+        <div class="input-container">
+            <label for="angle">Gradzahl:</label>
+            <div class="range-container">
+                <input type="range" id="angle" min="0" max="180" step="1" value="90" oninput="updateAngle()">
+                <span class="angle-display" id="angleValue">90°</span>
+            </div>
+        </div>
+        
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stopp</button>
+        <button id="homeButton">Ausgangsposition</button>
+    </div>
+    
+    <script>
+        function updateAngle() {
+            document.getElementById("angleValue").innerText = document.getElementById("angle").value + "°";
+        }
+        
+        document.getElementById("startButton").addEventListener("click", function() {
+            alert("Start gedrückt");
+        });
+        
+        document.getElementById("stopButton").addEventListener("click", function() {
+            alert("Stopp gedrückt");
+        });
+        
+        document.getElementById("homeButton").addEventListener("click", function() {
+            alert("Ausgangsposition gedrückt");
+        });
+    </script>
+</body>
+</html>
