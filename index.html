@@ -35,20 +35,10 @@
         .input-container {
             margin: 20px 0;
         }
-        .range-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        input[type="range"] {
-            width: 60%;
-            margin: 10px;
-        }
-        .angle-display {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            width: 60px;
+        input[type="number"] {
+            font-size: 20px;
+            padding: 5px;
+            width: 80px;
             text-align: center;
         }
     </style>
@@ -58,23 +48,17 @@
         <h1>Arduino Steuerung</h1>
         
         <div class="input-container">
-            <label for="angle">Gradzahl:</label>
-            <div class="range-container">
-                <input type="range" id="angle" min="0" max="180" step="1" value="90" oninput="updateAngle()">
-                <span class="angle-display" id="angleValue">90°</span>
-            </div>
+            <label for="distance">Distanz (mm):</label>
+            <input type="number" id="distance" min="0" max="100" step="1" value="50">
         </div>
         
         <button id="startButton">Start</button>
         <button id="stopButton">Stopp</button>
         <button id="homeButton">Ausgangsposition</button>
+        <button id="sendDistance">Distanz senden</button>
     </div>
     
     <script>
-        function updateAngle() {
-            document.getElementById("angleValue").innerText = document.getElementById("angle").value + "°";
-        }
-        
         document.getElementById("startButton").addEventListener("click", function() {
             alert("Start gedrückt");
         });
@@ -85,6 +69,11 @@
         
         document.getElementById("homeButton").addEventListener("click", function() {
             alert("Ausgangsposition gedrückt");
+        });
+
+        document.getElementById("sendDistance").addEventListener("click", function() {
+            let distance = document.getElementById("distance").value;
+            alert("Gesendete Distanz: " + distance + " mm");
         });
     </script>
 </body>
