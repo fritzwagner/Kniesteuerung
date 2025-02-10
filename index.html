@@ -59,22 +59,72 @@
     </div>
     
     <script>
-        document.getElementById("startButton").addEventListener("click", function() {
-            alert("Start gedrückt");
-        });
-        
-        document.getElementById("stopButton").addEventListener("click", function() {
-            alert("Stopp gedrückt");
-        });
-        
-        document.getElementById("homeButton").addEventListener("click", function() {
-            alert("Ausgangsposition gedrückt");
-        });
+       <script>
+    let bluetoothDevice;
+    let motorCharacteristic;
 
-        document.getElementById("sendDistance").addEventListener("click", function() {
-            let distance = document.getElementById("distance").value;
-            alert("Gesendete Distanz: " + distance + " mm");
-        });
+    async function connectBluetooth() {
+        try {
+            console.log("🔗 Suche nach BLE-Geräten...");
+            bluetoothDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: false,
+                filters: [{ name: "MotorController" }],
+                optionalServices: ["180D"]
+            });
+
+            console.log("✅ Gerät gefunden:", bluetoothDevice.name);
+            const server = await bluetoothDevice.gatt.connect();
+            console.log("🔌 Verbunden mit BLE-Server");
+
+            const service = await server.getPrimaryService("180D");
+            motorCharacteristic = await service.getCharacteristic("2A3D");
+
+            alert("🔗 Bluetooth verbunden!");
+        } catch (error) {
+            console.error("❌ Bluetooth-Verbindung fehlgeschlagen:", error);
+            alert("Fehler bei der Bluetooth-Verbindung!");
+        }
+    }
+
+    async function sendCommand(command) {
+        if (!motorCharacteristic) {
+            alert("⚠️ Bluetooth nicht verbunden!");
+            return;
+        }
+        try {
+            let encoder = new TextEncoder();
+            await motorCharacteristic.writeValue(encoder.encode(command));
+            console.log("📩 Befehl gesendet:", command);
+        } catch (error) {
+            console.error("❌ Fehler beim Senden:", error);
+        }
+    }
+
+    document.getElementById("startButton").addEventListener("click", function () {
+        sendCommand("s");
+    });
+
+    document.getElementById("stopButton").addEventListener("click", function () {
+        sendCommand("x");
+    });
+
+    document.getElementById("homeButton").addEventListener("click", function () {
+        sendCommand("s");
+    });
+
+    document.getElementById("sendDistance").addEventListener("click", function () {
+        let distance = document.getElementById("distance").value;
+        sendCommand(distance);
+    });
+
+    // Button zum Starten der Bluetooth-Verbindung hinzufügen
+    let bluetoothButton = document.createElement("button");
+    bluetoothButton.innerText = "🔗 Mit Arduino verbinden";
+    bluetoothButton.style.marginTop = "20px";
+    bluetoothButton.onclick = connectBluetooth;
+    document.querySelector(".container").appendChild(bluetoothButton);
+</script>
+
     </script>
 </body>
 </html>
