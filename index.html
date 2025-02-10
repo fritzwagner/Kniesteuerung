@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arduino Steuerung</title>
+    <title>Arduino BLE Steuerung</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,10 +17,12 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             display: inline-block;
+            max-width: 400px;
+            width: 90%;
         }
         button {
-            font-size: 20px;
-            padding: 10px 20px;
+            font-size: 18px;
+            padding: 10px 15px;
             margin: 10px;
             cursor: pointer;
             border: none;
@@ -28,15 +30,13 @@
             background: #007bff;
             color: white;
             transition: 0.3s;
+            width: 90%;
         }
         button:hover {
             background: #0056b3;
         }
-        .input-container {
-            margin: 20px 0;
-        }
         input[type="number"] {
-            font-size: 20px;
+            font-size: 18px;
             padding: 5px;
             width: 80px;
             text-align: center;
@@ -45,86 +45,76 @@
 </head>
 <body>
     <div class="container">
-        <h1>Arduino Steuerung</h1>
+        <h1>Arduino BLE Steuerung</h1>
+
+        <button id="connectButton">🔗 Mit Arduino verbinden</button>
         
         <div class="input-container">
             <label for="distance">Distanz (mm):</label>
             <input type="number" id="distance" min="0" max="100" step="1" value="50">
         </div>
-        
-        <button id="startButton">Start</button>
-        <button id="stopButton">Stopp</button>
-        <button id="homeButton">Ausgangsposition</button>
-        <button id="sendDistance">Distanz senden</button>
+
+        <button id="startButton">▶️ Start</button>
+        <button id="stopButton">⏹️ Stopp</button>
+        <button id="homeButton">🏠 Ausgangsposition</button>
+        <button id="sendDistance">📩 Distanz senden</button>
     </div>
-    
+
     <script>
-       <script>
-    let bluetoothDevice;
-    let motorCharacteristic;
+        let bluetoothDevice;
+        let motorCharacteristic;
 
-    async function connectBluetooth() {
-        try {
-            console.log("🔗 Suche nach BLE-Geräten...");
-            bluetoothDevice = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: false,
-                filters: [{ name: "MotorController" }],
-                optionalServices: ["180D"]
-            });
+        async function connectBluetooth() {
+            try {
+                console.log("🔗 Suche nach BLE-Geräten...");
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: false,
+                    filters: [{ name: "MotorController" }],
+                    optionalServices: ["180D"]
+                });
 
-            console.log("✅ Gerät gefunden:", bluetoothDevice.name);
-            const server = await bluetoothDevice.gatt.connect();
-            console.log("🔌 Verbunden mit BLE-Server");
+                console.log("✅ Gerät gefunden:", bluetoothDevice.name);
+                const server = await bluetoothDevice.gatt.connect();
+                console.log("🔌 Verbunden mit BLE-Server");
 
-            const service = await server.getPrimaryService("180D");
-            motorCharacteristic = await service.getCharacteristic("2A3D");
+                const service = await server.getPrimaryService("180D");
+                motorCharacteristic = await service.getCharacteristic("2A3D");
 
-            alert("🔗 Bluetooth verbunden!");
-        } catch (error) {
-            console.error("❌ Bluetooth-Verbindung fehlgeschlagen:", error);
-            alert("Fehler bei der Bluetooth-Verbindung!");
+                alert("🔗 Bluetooth verbunden!");
+            } catch (error) {
+                console.error("❌ Bluetooth-Verbindung fehlgeschlagen:", error);
+                alert("Fehler bei der Bluetooth-Verbindung!");
+            }
         }
-    }
 
-    async function sendCommand(command) {
-        if (!motorCharacteristic) {
-            alert("⚠️ Bluetooth nicht verbunden!");
-            return;
+        async function sendCommand(command) {
+            if (!motorCharacteristic) {
+                alert("⚠️ Bluetooth nicht verbunden!");
+                return;
+            }
+            try {
+                let encoder = new TextEncoder();
+                await motorCharacteristic.writeValue(encoder.encode(command));
+                console.log("📩 Befehl gesendet:", command);
+            } catch (error) {
+                console.error("❌ Fehler beim Senden:", error);
+            }
         }
-        try {
-            let encoder = new TextEncoder();
-            await motorCharacteristic.writeValue(encoder.encode(command));
-            console.log("📩 Befehl gesendet:", command);
-        } catch (error) {
-            console.error("❌ Fehler beim Senden:", error);
-        }
-    }
 
-    document.getElementById("startButton").addEventListener("click", function () {
-        sendCommand("s");
-    });
-
-    document.getElementById("stopButton").addEventListener("click", function () {
-        sendCommand("x");
-    });
-
-    document.getElementById("homeButton").addEventListener("click", function () {
-        sendCommand("s");
-    });
-
-    document.getElementById("sendDistance").addEventListener("click", function () {
-        let distance = document.getElementById("distance").value;
-        sendCommand(distance);
-    });
-
-    // Button zum Starten der Bluetooth-Verbindung hinzufügen
-    let bluetoothButton = document.createElement("button");
-    bluetoothButton.innerText = "🔗 Mit Arduino verbinden";
-    bluetoothButton.style.marginTop = "20px";
-    bluetoothButton.onclick = connectBluetooth;
-    document.querySelector(".container").appendChild(bluetoothButton);
-</script>
-
+        document.getElementById("connectButton").addEventListener("click", connectBluetooth);
+        document.getElementById("startButton").addEventListener("click", function () {
+            sendCommand("s");
+        });
+        document.getElementById("stopButton").addEventListener("click", function () {
+            sendCommand("x");
+        });
+        document.getElementById("homeButton").addEventListener("click", function () {
+            sendCommand("s");
+        });
+        document.getElementById("sendDistance").addEventListener("click", function () {
+            let distance = document.getElementById("distance").value;
+            sendCommand(distance);
+        });
     </script>
 </body>
 </html>
